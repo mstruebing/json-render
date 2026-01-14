@@ -3,17 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { CodeBlock } from "./code-block";
 
-const PROMPT = "Create a welcome card with a get started button";
+const PROMPT = "Create a contact form with name, email, and message";
 
 interface StageJson {
   key: string;
   type: string;
-  props: {
-    title?: string;
-    description?: string;
-    label?: string;
-    action?: string;
-  };
+  props: Record<string, unknown>;
   children?: StageJson[];
 }
 
@@ -23,11 +18,11 @@ interface Stage {
 }
 
 const STAGES: Stage[] = [
-  { json: { key: "root", type: "Card", props: {} }, stream: '{"op":"set","path":"/root","value":{"key":"root","type":"Card"}}' },
-  { json: { key: "root", type: "Card", props: { title: "Welcome" } }, stream: '{"op":"replace","path":"/root/props/title","value":"Welcome"}' },
-  { json: { key: "root", type: "Card", props: { title: "Welcome", description: "Get started with json-render" } }, stream: '{"op":"replace","path":"/root/props/description","value":"Get started..."}' },
-  { json: { key: "root", type: "Card", props: { title: "Welcome", description: "Get started with json-render" }, children: [{ key: "btn", type: "Button", props: {} }] }, stream: '{"op":"add","path":"/root/children","value":{"key":"btn","type":"Button"}}' },
-  { json: { key: "root", type: "Card", props: { title: "Welcome", description: "Get started with json-render" }, children: [{ key: "btn", type: "Button", props: { label: "Get Started", action: "start" } }] }, stream: '{"op":"replace","path":"/root/children/0/props","value":{"label":"Get Started"}}' },
+  { json: { key: "form", type: "Form", props: { title: "Contact Us" }, children: [] }, stream: '{"op":"set","path":"/form","value":{"type":"Form","props":{"title":"Contact Us"}}}' },
+  { json: { key: "form", type: "Form", props: { title: "Contact Us" }, children: [{ key: "name", type: "Input", props: { label: "Name", name: "name" } }] }, stream: '{"op":"add","path":"/form/children/0","value":{"type":"Input","props":{"label":"Name"}}}' },
+  { json: { key: "form", type: "Form", props: { title: "Contact Us" }, children: [{ key: "name", type: "Input", props: { label: "Name", name: "name" } }, { key: "email", type: "Input", props: { label: "Email", name: "email" } }] }, stream: '{"op":"add","path":"/form/children/1","value":{"type":"Input","props":{"label":"Email"}}}' },
+  { json: { key: "form", type: "Form", props: { title: "Contact Us" }, children: [{ key: "name", type: "Input", props: { label: "Name", name: "name" } }, { key: "email", type: "Input", props: { label: "Email", name: "email" } }, { key: "message", type: "Textarea", props: { label: "Message", name: "message" } }] }, stream: '{"op":"add","path":"/form/children/2","value":{"type":"Textarea","props":{"label":"Message"}}}' },
+  { json: { key: "form", type: "Form", props: { title: "Contact Us" }, children: [{ key: "name", type: "Input", props: { label: "Name", name: "name" } }, { key: "email", type: "Input", props: { label: "Email", name: "email" } }, { key: "message", type: "Textarea", props: { label: "Message", name: "message" } }, { key: "submit", type: "Button", props: { label: "Send Message", action: "submit" } }] }, stream: '{"op":"add","path":"/form/children/3","value":{"type":"Button","props":{"label":"Send Message"}}}' },
 ];
 
 const CODE_EXAMPLE = `import { createCatalog } from '@json-render/core';
@@ -35,12 +30,23 @@ import { z } from 'zod';
 
 export const catalog = createCatalog({
   components: {
-    Card: {
+    Form: {
       props: z.object({
         title: z.string(),
-        description: z.string().nullable(),
       }),
       hasChildren: true,
+    },
+    Input: {
+      props: z.object({
+        label: z.string(),
+        name: z.string(),
+      }),
+    },
+    Textarea: {
+      props: z.object({
+        label: z.string(),
+        name: z.string(),
+      }),
     },
     Button: {
       props: z.object({
@@ -128,38 +134,51 @@ export function Demo() {
       return <div className="text-muted-foreground/50 text-sm">waiting...</div>;
     }
 
-    const { props, children } = currentStage.json;
-    const hasTitle = props.title;
-    const hasDesc = props.description;
-    const buttonLabel = children?.[0]?.props?.label;
+    const { props, children = [] } = currentStage.json;
+    const title = props.title as string | undefined;
+    const nameField = children.find(c => c.key === "name");
+    const emailField = children.find(c => c.key === "email");
+    const messageField = children.find(c => c.key === "message");
+    const submitBtn = children.find(c => c.key === "submit");
 
     return (
       <div className="text-center animate-in fade-in duration-200">
-        <div className="border border-border rounded-lg p-4 bg-background inline-block text-left">
-          {hasTitle ? (
-            <h3 className="font-semibold mb-1">{props.title}</h3>
-          ) : (
-            <div className="h-5 w-20 bg-muted rounded animate-pulse mb-1" />
+        <div className="border border-border rounded-lg p-4 bg-background inline-block text-left w-56">
+          {title && (
+            <h3 className="font-semibold mb-3 text-sm">{title}</h3>
           )}
-          {hasDesc ? (
-            <p className="text-xs text-muted-foreground mb-3">{props.description}</p>
-          ) : hasTitle ? (
-            <div className="h-3 w-32 bg-muted rounded animate-pulse mb-3" />
-          ) : null}
-          {buttonLabel ? (
-            <button
-              onClick={handleAction}
-              className="px-3 py-1.5 bg-foreground text-background rounded text-xs font-medium hover:opacity-90 transition-opacity"
-            >
-              {buttonLabel}
-            </button>
-          ) : hasDesc ? (
-            <div className="h-7 w-24 bg-muted rounded animate-pulse" />
-          ) : null}
+          <div className="space-y-2">
+            {nameField && (
+              <div className="animate-in fade-in slide-in-from-bottom-1 duration-200">
+                <label className="text-[10px] text-muted-foreground block mb-0.5">{nameField.props.label as string}</label>
+                <div className="h-7 w-full bg-card border border-border rounded px-2 text-xs" />
+              </div>
+            )}
+            {emailField && (
+              <div className="animate-in fade-in slide-in-from-bottom-1 duration-200">
+                <label className="text-[10px] text-muted-foreground block mb-0.5">{emailField.props.label as string}</label>
+                <div className="h-7 w-full bg-card border border-border rounded px-2 text-xs" />
+              </div>
+            )}
+            {messageField && (
+              <div className="animate-in fade-in slide-in-from-bottom-1 duration-200">
+                <label className="text-[10px] text-muted-foreground block mb-0.5">{messageField.props.label as string}</label>
+                <div className="h-14 w-full bg-card border border-border rounded px-2 text-xs" />
+              </div>
+            )}
+            {submitBtn && (
+              <button
+                onClick={handleAction}
+                className="w-full px-3 py-1.5 bg-foreground text-background rounded text-xs font-medium hover:opacity-90 transition-opacity animate-in fade-in slide-in-from-bottom-1 duration-200"
+              >
+                {submitBtn.props.label as string}
+              </button>
+            )}
+          </div>
         </div>
         {actionFired && (
           <div className="mt-3 text-xs font-mono text-muted-foreground animate-in fade-in slide-in-from-bottom-2">
-            onAction(&quot;start&quot;)
+            onAction(&quot;submit&quot;)
           </div>
         )}
       </div>
@@ -219,7 +238,7 @@ export function Demo() {
               </button>
             ))}
           </div>
-          <div className="border border-border rounded p-3 bg-card font-mono text-xs h-72 overflow-auto text-left">
+          <div className="border border-border rounded p-3 bg-card font-mono text-xs h-96 overflow-auto text-left">
             {activeTab === "stream" && (
               <div className="space-y-1">
                 {streamLines.map((line, i) => (
@@ -254,7 +273,7 @@ export function Demo() {
         {/* Rendered output */}
         <div>
           <div className="text-xs text-muted-foreground mb-2 font-mono">render</div>
-          <div className="border border-border rounded p-3 bg-card h-72 flex items-center justify-center">
+          <div className="border border-border rounded p-3 bg-card h-96 flex items-center justify-center">
             {renderPreview()}
           </div>
         </div>
