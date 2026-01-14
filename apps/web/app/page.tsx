@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Demo } from "@/components/demo";
+import { Code } from "@/components/code";
 
 export default function Home() {
   return (
@@ -70,8 +71,7 @@ export default function Home() {
               <p className="text-muted-foreground mb-6">
                 Components, actions, and validation functions. All type-safe with Zod.
               </p>
-              <pre className="text-xs">
-                <code>{`import { createCatalog } from '@json-render/core';
+              <Code lang="typescript">{`import { createCatalog } from '@json-render/core';
 import { z } from 'zod';
 
 export const catalog = createCatalog({
@@ -94,16 +94,14 @@ export const catalog = createCatalog({
   actions: {
     export: { params: z.object({ format: z.string() }) },
   },
-});`}</code>
-              </pre>
+});`}</Code>
             </div>
             <div>
               <h2 className="text-2xl font-semibold mb-4">AI generates JSON</h2>
               <p className="text-muted-foreground mb-6">
                 Constrained output that your components render natively.
               </p>
-              <pre className="text-xs">
-                <code>{`{
+              <Code lang="json">{`{
   "key": "dashboard",
   "type": "Card",
   "props": {
@@ -121,8 +119,7 @@ export const catalog = createCatalog({
       }
     }
   ]
-}`}</code>
-              </pre>
+}`}</Code>
             </div>
           </div>
         </div>

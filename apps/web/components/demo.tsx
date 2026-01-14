@@ -24,24 +24,24 @@ interface SimulationStage {
 
 const SIMULATION_STAGES: SimulationStage[] = [
   {
-    tree: { root: "form", elements: { form: { key: "form", type: "Form", props: { title: "Contact Us" }, children: [] } } },
-    stream: '{"op":"set","path":"/root","value":"form"}',
+    tree: { root: "card", elements: { card: { key: "card", type: "Card", props: { title: "Contact Us", maxWidth: "md" }, children: [] } } },
+    stream: '{"op":"set","path":"/root","value":"card"}',
   },
   {
-    tree: { root: "form", elements: { form: { key: "form", type: "Form", props: { title: "Contact Us" }, children: ["name"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } } } },
-    stream: '{"op":"add","path":"/elements/form","value":{"key":"form","type":"Form","props":{"title":"Contact Us"},"children":["name"]}}',
+    tree: { root: "card", elements: { card: { key: "card", type: "Card", props: { title: "Contact Us", maxWidth: "md" }, children: ["name"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } } } },
+    stream: '{"op":"add","path":"/elements/card","value":{"key":"card","type":"Card","props":{"title":"Contact Us","maxWidth":"md"},"children":["name"]}}',
   },
   {
-    tree: { root: "form", elements: { form: { key: "form", type: "Form", props: { title: "Contact Us" }, children: ["name", "email"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } }, email: { key: "email", type: "Input", props: { label: "Email", name: "email" } } } },
+    tree: { root: "card", elements: { card: { key: "card", type: "Card", props: { title: "Contact Us", maxWidth: "md" }, children: ["name", "email"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } }, email: { key: "email", type: "Input", props: { label: "Email", name: "email" } } } },
     stream: '{"op":"add","path":"/elements/email","value":{"key":"email","type":"Input","props":{"label":"Email","name":"email"}}}',
   },
   {
-    tree: { root: "form", elements: { form: { key: "form", type: "Form", props: { title: "Contact Us" }, children: ["name", "email", "message"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } }, email: { key: "email", type: "Input", props: { label: "Email", name: "email" } }, message: { key: "message", type: "Textarea", props: { label: "Message", name: "message" } } } },
+    tree: { root: "card", elements: { card: { key: "card", type: "Card", props: { title: "Contact Us", maxWidth: "md" }, children: ["name", "email", "message"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } }, email: { key: "email", type: "Input", props: { label: "Email", name: "email" } }, message: { key: "message", type: "Textarea", props: { label: "Message", name: "message" } } } },
     stream: '{"op":"add","path":"/elements/message","value":{"key":"message","type":"Textarea","props":{"label":"Message","name":"message"}}}',
   },
   {
-    tree: { root: "form", elements: { form: { key: "form", type: "Form", props: { title: "Contact Us" }, children: ["name", "email", "message", "submit"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } }, email: { key: "email", type: "Input", props: { label: "Email", name: "email" } }, message: { key: "message", type: "Textarea", props: { label: "Message", name: "message" } }, submit: { key: "submit", type: "Button", props: { label: "Send Message", action: "submit" } } } },
-    stream: '{"op":"add","path":"/elements/submit","value":{"key":"submit","type":"Button","props":{"label":"Send Message","action":"submit"}}}',
+    tree: { root: "card", elements: { card: { key: "card", type: "Card", props: { title: "Contact Us", maxWidth: "md" }, children: ["name", "email", "message", "submit"] }, name: { key: "name", type: "Input", props: { label: "Name", name: "name" } }, email: { key: "email", type: "Input", props: { label: "Email", name: "email" } }, message: { key: "message", type: "Textarea", props: { label: "Message", name: "message" } }, submit: { key: "submit", type: "Button", props: { label: "Send Message", variant: "primary" } } } },
+    stream: '{"op":"add","path":"/elements/submit","value":{"key":"submit","type":"Button","props":{"label":"Send Message","variant":"primary"}}}',
   },
 ];
 
@@ -296,9 +296,11 @@ export function Demo() {
         return (
           <div key={element.key} className={baseClass}>
             {props.label ? <label className="text-[10px] text-muted-foreground block mb-0.5 text-left">{props.label as string}</label> : null}
-            <div className="h-7 w-full bg-card border border-border rounded px-2 text-xs flex items-center text-muted-foreground/50">
-              {props.placeholder as string || ""}
-            </div>
+            <input
+              type={(props.type as string) || "text"}
+              placeholder={props.placeholder as string || ""}
+              className="h-7 w-full bg-card border border-border rounded px-2 text-xs focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            />
           </div>
         );
       case "Textarea":
@@ -306,9 +308,11 @@ export function Demo() {
         return (
           <div key={element.key} className={baseClass}>
             {props.label ? <label className="text-[10px] text-muted-foreground block mb-0.5 text-left">{props.label as string}</label> : null}
-            <div className={`w-full bg-card border border-border rounded px-2 py-1 text-xs text-muted-foreground/50`} style={{ minHeight: rows * 16 }}>
-              {props.placeholder as string || ""}
-            </div>
+            <textarea
+              placeholder={props.placeholder as string || ""}
+              rows={rows}
+              className="w-full bg-card border border-border rounded px-2 py-1 text-xs resize-none focus:outline-none focus:ring-1 focus:ring-foreground/20"
+            />
           </div>
         );
       case "Select":
@@ -380,7 +384,7 @@ export function Demo() {
         const variant = props.variant as string;
         const btnClass = variant === "danger" ? "bg-red-500 text-white" : variant === "secondary" ? "bg-card border border-border text-foreground" : "bg-foreground text-background";
         return (
-          <button key={element.key} onClick={handleAction} className={`px-3 py-1.5 rounded text-xs font-medium hover:opacity-90 transition-opacity ${btnClass} ${baseClass}`}>
+          <button key={element.key} onClick={handleAction} className={`self-start px-3 py-1.5 rounded text-xs font-medium hover:opacity-90 transition-opacity ${btnClass} ${baseClass}`}>
             {props.label as string}
           </button>
         );
@@ -480,13 +484,15 @@ export function Demo() {
     if (!root) return null;
 
     return (
-      <div className="animate-in fade-in duration-200 w-full min-h-full flex flex-col items-center">
-        {renderElement(root, currentTree.elements)}
-        {actionFired && (
-          <div className="mt-3 text-xs font-mono text-muted-foreground text-center animate-in fade-in slide-in-from-bottom-2">
-            onAction()
-          </div>
-        )}
+      <div className="animate-in fade-in duration-200 w-full flex flex-col items-center py-4">
+        <div className="my-auto">
+          {renderElement(root, currentTree.elements)}
+          {actionFired && (
+            <div className="mt-3 text-xs font-mono text-muted-foreground text-center animate-in fade-in slide-in-from-bottom-2">
+              onAction()
+            </div>
+          )}
+        </div>
       </div>
     );
   };
